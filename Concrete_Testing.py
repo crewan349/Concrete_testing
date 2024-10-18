@@ -49,8 +49,7 @@ class NewSample(ttk.Frame):
         hdr_txt = "Please fill all fields" 
         hdr = ttk.Label(master=self, text=hdr_txt, width=50)
         hdr.pack(fill=X, pady=10)
-
-        self.create_form_entry("date", self.date)
+        self.create_form_entry("date (MM-DD-YYYY)", self.date)
         self.create_form_entry("job", self.job)
         self.create_form_entry("location", self.location)
         self.create_form_entry("slump", self.slump)
@@ -65,7 +64,7 @@ class NewSample(ttk.Frame):
         container = ttk.Frame(self)
         container.pack(fill=X, expand=YES, pady=5)
 
-        lbl = ttk.Label(master=container, text=label.title(), width=10)
+        lbl = ttk.Label(master=container, text=label.title(), width=20)
         lbl.pack(side=LEFT, padx=5)
 
         ent = ttk.Entry(master=container, textvariable=variable)
@@ -96,16 +95,89 @@ class NewSample(ttk.Frame):
         cnl_btn.pack(side=RIGHT, padx=5)
 
     def on_submit(self):
-        # Print the contents to console and return the values.
-        print("date: ", self.date.get())
-        print("job: ", self.job.get())
-        print("location: ", self.location.get())
-        print("slump: ", self.slump.get())
-        print("air: ", self.air.get())
-        print("temp: ", self.temp.get())
-        print("unit weight: ", self.unitWeight.get())
-        self.forget()
-        return self.date.get(), self.job.get(), self.location.get(), self.slump.get(), self.air.get(), self.temp.get(), self.unitWeight.get()
+        # check to make sure a date was entered
+        checkDate = False
+        check = 0
+        dateArray = self.date.get().split('-')
+        if len(dateArray) == 3:
+            if 1 <= int(dateArray[0]) <= 12:
+                if 1 <= int(dateArray[1]) <= 31:
+                    if 1000 <= int(dateArray[2]) <= 9999:
+                         checkDate = True                
+        if checkDate == False:
+            errorMessage = ttk.Label(master=self, text="Date must be MM-DD-YYYY", width=50)
+            errorMessage.pack(fill=X, pady=10)
+            check += 1 
+
+        # job and location just need to not be empty
+        if self.job.get() == '':
+            check +=1
+            errorMessage = ttk.Label(master=self, text="Job must have data", width=50)
+            errorMessage.pack(fill=X, pady=10)
+        if self.location.get() == '':
+            check +=1
+            errorMessage = ttk.Label(master=self, text="location must have data", width=50)
+            errorMessage.pack(fill=X, pady=10)
+        
+        # slump must be to the quarter inch
+        try:
+            if 1 < float(self.slump.get()) < 12:
+                val = float('.' + self.slump.get().split('.')[1] + '0')
+                if val == .25 or val == .5 or val == .75 or val == 0:
+                    checkSlump = True
+        except:
+            checkSlump = False
+        if 1 <= int(self.slump.get()) <= 12:
+            checkSlump = True
+
+        if not checkSlump:
+            check +=1
+            errorMessage = ttk.Label(master=self, text="Slump most be rounded to the nearest quarter inch", width=50)
+            errorMessage.pack(fill=X, pady=10)
+
+        checkAir = False
+        try:
+            if self.air.get().isdigit():
+                checkAir = True
+            airVal = self.air.get().split('.')
+            if len(airVal) == 2:
+                if len(airVal[1]) <= 1 and airVal[0].isdigit(): 
+                    if airVal[1].isdigit() or airVal[1] == '':
+                        checkAir = True
+        except:
+            checkAir = False
+
+        if not checkAir:
+            check +=1
+            errorMessage = ttk.Label(master=self, text="Air should be rounded to the nearist tenth", width=50)
+            errorMessage.pack(fill=X, pady=10)
+
+        #temp value just needs to be a whole number
+        if not self.temp.get().isdigit():
+            check +=1
+            errorMessage = ttk.Label(master=self, text="Tempature should be rounded to the nearist whole number", width=50)
+            errorMessage.pack(fill=X, pady=10)
+
+        checkUW = False
+        try:
+            if self.unitWeight.get().isdigit():
+                checkUW = True
+            uWVal = self.unitWeight.get().split('.')
+            if len(uWVal) == 2:
+                if len(uWVal[1]) <= 1 and uWVal[0].isdigit(): 
+                    if uWVal[1].isdigit() or uWVal[1] == '':
+                        checkUW = True
+        except:
+            checkUW = False
+
+        if not checkUW:
+            check +=1
+            errorMessage = ttk.Label(master=self, text="Unit weight should be rounded to the nearist tenth", width=50)
+            errorMessage.pack(fill=X, pady=10)
+        
+        if check <1:
+            self.forget()
+            return self.date.get(), self.job.get(), self.location.get(), self.slump.get(), self.air.get(), self.temp.get(), self.unitWeight.get()
 
     def on_cancel(self):
         # Cancel and close the application.
@@ -183,7 +255,12 @@ class StrengthTest(ttk.Frame):
         self.forget()
 
 def checkNewSample(date, job, location, slump, air, temp, unitWeight):
-    return True
+    check = [False,False,False,False,False,False]
+    
+    if isinstance(date, str):
+        check[0] = bool(datetime(date, "%d-%m-%y"))
+
+    return check
 
 if __name__ == "__main__":
 
