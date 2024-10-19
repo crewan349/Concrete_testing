@@ -1,6 +1,8 @@
 import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
+import pandas as pd
+import csv
 
 class MainMenu(ttk.Frame):
     def __init__(self, master):
@@ -95,6 +97,7 @@ class NewSample(ttk.Frame):
         cnl_btn.pack(side=RIGHT, padx=5)
 
     def on_submit(self):
+        #on_submit will check the user input
         # check to make sure a date was entered
         checkDate = False
         check = 0
@@ -121,20 +124,22 @@ class NewSample(ttk.Frame):
         
         # slump must be to the quarter inch
         try:
-            if 1 < float(self.slump.get()) < 12:
-                val = float('.' + self.slump.get().split('.')[1] + '0')
+            slumpVal = self.slump.get()
+            if not '.' in slumpVal:
+                slumpVal = slumpVal + '.'
+            if 1 < float(slumpVal) < 12:
+                val = float('.' + slumpVal.split('.')[1] + '0')
                 if val == .25 or val == .5 or val == .75 or val == 0:
                     checkSlump = True
         except:
             checkSlump = False
-        if 1 <= int(self.slump.get()) <= 12:
-            checkSlump = True
 
         if not checkSlump:
             check +=1
             errorMessage = ttk.Label(master=self, text="Slump most be rounded to the nearest quarter inch", width=50)
             errorMessage.pack(fill=X, pady=10)
 
+        #the air must be put in to the nearist tenth
         checkAir = False
         try:
             if self.air.get().isdigit():
@@ -158,6 +163,7 @@ class NewSample(ttk.Frame):
             errorMessage = ttk.Label(master=self, text="Tempature should be rounded to the nearist whole number", width=50)
             errorMessage.pack(fill=X, pady=10)
 
+        #unit wight must be rounded to the tenth
         checkUW = False
         try:
             if self.unitWeight.get().isdigit():
@@ -175,9 +181,28 @@ class NewSample(ttk.Frame):
             errorMessage = ttk.Label(master=self, text="Unit weight should be rounded to the nearist tenth", width=50)
             errorMessage.pack(fill=X, pady=10)
         
+        #if all cheks pass add to csv file
         if check <1:
             self.forget()
-            return self.date.get(), self.job.get(), self.location.get(), self.slump.get(), self.air.get(), self.temp.get(), self.unitWeight.get()
+
+            rowCount = 0
+            with open('tests.csv', 'r') as csvRead:
+                reader = csv.reader(csvRead)
+                rowCount = sum(1 for row in reader)
+                print(rowCount)
+                csvRead.close()
+
+            #newRow = {'date': self.date.get(), 'job': self.job.get(),'location': self.location.get(), 'slump': self.slump.get(), 
+            # 'air': self.air.get(), 'temp': self.temp.get(), 'unit weight': self.unitWeight.get(),}
+            newRow = [rowCount, self.date.get(), self.job.get(), self.location.get(), self.slump.get(), self.air.get(), 
+                      self.temp.get(), self.unitWeight.get(), '*']
+
+            with open('tests.csv', 'a', newline='') as csvEdit:
+                writer = csv.writer(csvEdit)
+                writer.writerow(newRow)
+                csvEdit.close()
+
+            return True
 
     def on_cancel(self):
         # Cancel and close the application.
@@ -253,14 +278,6 @@ class StrengthTest(ttk.Frame):
     def on_cancel(self):
         # Cancel and close the application.
         self.forget()
-
-def checkNewSample(date, job, location, slump, air, temp, unitWeight):
-    check = [False,False,False,False,False,False]
-    
-    if isinstance(date, str):
-        check[0] = bool(datetime(date, "%d-%m-%y"))
-
-    return check
 
 if __name__ == "__main__":
 
