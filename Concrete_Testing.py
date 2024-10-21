@@ -1,8 +1,9 @@
 import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-import pandas as pd
 import csv
+import pandas as pd
+import math
 
 class MainMenu(ttk.Frame):
     def __init__(self, master):
@@ -27,7 +28,7 @@ class MainMenu(ttk.Frame):
         streTest = ttk.Button(self, text="Strength Test", bootstyle=SECONDARY, command= StrengthTest)
         streTest.pack(side=LEFT, padx=5, pady=10)
         
-        check = ttk.Button(self, text="Check Results", bootstyle=(SECONDARY))
+        check = ttk.Button(self, text="Check Results", bootstyle=(SECONDARY), command= CheckResults)
         check.pack(side=LEFT, padx=5, pady=10)
 
 class NewSample(ttk.Frame):
@@ -124,10 +125,11 @@ class NewSample(ttk.Frame):
         
         # slump must be to the quarter inch
         try:
+            checkSlump = False
             slumpVal = self.slump.get()
             if not '.' in slumpVal:
                 slumpVal = slumpVal + '.'
-            if 1 < float(slumpVal) < 12:
+            if 0 <= float(slumpVal) <= 12:
                 val = float('.' + slumpVal.split('.')[1] + '0')
                 if val == .25 or val == .5 or val == .75 or val == 0:
                     checkSlump = True
@@ -202,37 +204,66 @@ class NewSample(ttk.Frame):
                 writer.writerow(newRow)
                 csvEdit.close()
 
-            return True
-
     def on_cancel(self):
         # Cancel and close the application.
         self.forget()
 
-
 class StrengthTest(ttk.Frame):
     def __init__(self):
+        self.frame = ttk.Frame.winfo_toplevel
         super().__init__( padding=(20, 10))
         self.pack(fill=BOTH, expand=YES)
     
         # strenght test variables
+        self.test = ttk.StringVar(value=None)
         self.diameter = ttk.StringVar(value="")
         self.load = ttk.StringVar(value="")
 
-        # new sample header
-        hdr_txt = "Please fill all fields" 
-        hdr = ttk.Label(master=self, text=hdr_txt, width=50)
-        hdr.pack(fill=X, pady=10)
         
-        self.create_form_entry("diameter", self.diameter)
-        self.create_form_entry("load", self.load)
-        self.create_button_box()
+
+        # Tests that can be ran
+        testsToRun = ''
+        with open('tests.csv', 'r') as file:
+            reader = csv.reader(file)
+            
+            #find all strength tests that need to be ran
+            for row in reader:
+                if '*' == row[8]:
+                    if not len(testsToRun) == 0:
+                        testsToRun = testsToRun + ', '
+                    testsToRun = testsToRun + row[0]
+            self.testToRun = ttk.StringVar(value=testsToRun)
+            file.close()
+
+        if len(testsToRun) > 0:
+            # Strength header
+            hdr_txt1 = "Please fill all fields" 
+            hdr = ttk.Label(master=self, text=hdr_txt1, width=50)
+            hdr.pack(fill=X, pady=10)
+
+            hdr_txt2 = "Which strength test was ran: (" + testsToRun + ')'
+            hdr = ttk.Label(master=self, text=hdr_txt2, width=50)
+            hdr.pack(fill=X, pady=10)
+            
+            self.create_form_entry("test number", self.test)
+            self.create_form_entry("diameter", self.diameter)
+            self.create_form_entry("load", self.load)
+            self.create_button_box()
+        else:
+            # Strength header
+            hdr_txt3 = "There are no tests to run" 
+            hdr = ttk.Label(master=self, text=hdr_txt3, width=50)
+            hdr.pack(fill=X, pady=10)
+
+            # Cancel button
+            self.create_cancel_button()
 
     def create_form_entry(self, label, variable):
         # Creates a single form entry
         container = ttk.Frame(self)
         container.pack(fill=X, expand=YES, pady=5)
 
-        lbl = ttk.Label(master=container, text=label.title(), width=10)
+        lbl = ttk.Label(master=container, text=label.title(), width=15)
         lbl.pack(side=LEFT, padx=5)
 
         ent = ttk.Entry(master=container, textvariable=variable)
@@ -262,19 +293,209 @@ class StrengthTest(ttk.Frame):
         )
         cnl_btn.pack(side=RIGHT, padx=5)
 
+    def create_cancel_button(self):
+        # Create the application buttonbox
+        container = ttk.Frame(self)
+        container.pack(fill=X, expand=YES, pady=(15, 10))
+
+        cnl_btn = ttk.Button(
+            master=container,
+            text="Cancel",
+            command=self.on_cancel,
+            bootstyle=DANGER,
+            width=6,
+        )
+        cnl_btn.pack(side=RIGHT, padx=5)
+
     def on_submit(self):
-        checkDiameter = self.diameter.get()
-        print(checkDiameter)
-        if checkDiameter == '4' or checkDiameter == '6':
-            if self.load.get().isdigit():
-                # Print the contents to console and return the values.
-                print("diameter: ", self.diameter.get())
-                print("load: ", self.load.get())
+        check = 0
 
-                self.forget()
-                return self.diameter.get(), self.load.get()
+        #make sure test can be ran
+        avaTests = self.testToRun.get().split(', ')
+        if not self.test.get() in avaTests:
+            errorMessage = ttk.Label(master=self, text="Test must be one of the available" , width=50)
+            errorMessage.pack(fill=X, pady=10)
+            check += 1
+            
+        if not self.diameter.get() == '4': 
+            if not self.diameter.get() == '6':
+                errorMessage = ttk.Label(master=self, text="Diameter must be 4 or 6" , width=50)
+                errorMessage.pack(fill=X, pady=10)
+                check+= 1
+        
+        if not self.load.get().isdigit():
+            errorMessage = ttk.Label(master=self, text="Load should be a whole number" , width=50)
+            errorMessage.pack(fill=X, pady=10)
+                
+        if check < 1:
+            # Print the contents to console and return the values.
+            strength = int(round(int(self.load.get()) / (math.pi * (int(self.diameter.get()) / 2)**2), -1))
+            print(strength)
 
-    
+            df = pd.read_csv('tests.csv')
+
+            df.loc[int(self.test.get())-1,'strength'] = strength
+
+            df.to_csv('tests.csv', index=False) 
+            print(df)
+            del df
+
+            self.forget()
+            return True
+  
+    def on_cancel(self):
+        # Cancel and close the application.
+        self.forget()
+
+class CheckResults(ttk.Frame):
+    def __init__(self):
+        self.frame = ttk.Frame.winfo_toplevel
+        super().__init__( padding=(20, 10))
+        self.pack(fill=BOTH, expand=YES)
+
+        # strenght test variables
+        self.choice = ttk.StringVar(value=None)
+        
+
+        # Tests that can be ran
+        sampleNumbers = ''
+        with open('tests.csv', 'r') as file:
+            reader = csv.reader(file)
+            
+            #find all strength tests that need to be ran
+            for row in reader:
+                    if not row[0] == 'index':
+                        sampleNumbers = sampleNumbers + row[0] + ', '
+            self.samples = ttk.StringVar(value=sampleNumbers[:-2])
+            file.close()
+
+        if len(sampleNumbers) > 0:
+            # check sample header
+            hdr_txt1 = "Which sample do you want to see the results for?" 
+            hdr = ttk.Label(master=self, text=hdr_txt1, width=50)
+            hdr.pack(fill=X, pady=10)
+
+            # available samples 
+            hdr_txt2 = "Samples " + self.samples.get().split(', ')[0] + " - " + self.samples.get().split(', ')[-1] + " are available"
+            hdr = ttk.Label(master=self, text=hdr_txt2, width=50)
+            hdr.pack(fill=X, pady=10)
+            
+            self.create_form_entry("sample number", self.choice)
+            self.create_button_box()
+        else:
+            # Strength header
+            hdr_txt3 = "There are no samples on file" 
+            hdr = ttk.Label(master=self, text=hdr_txt3, width=50)
+            hdr.pack(fill=X, pady=10)
+
+            # Cancel button
+            self.create_cancel_button()
+
+    def create_form_entry(self, label, variable):
+        # Creates a single form entry
+        container = ttk.Frame(self)
+        container.pack(fill=X, expand=YES, pady=5)
+
+        lbl = ttk.Label(master=container, text=label.title(), width=15)
+        lbl.pack(side=LEFT, padx=5)
+
+        ent = ttk.Entry(master=container, textvariable=variable)
+        ent.pack(side=LEFT, padx=5, fill=X, expand=YES)
+
+    def create_button_box(self):
+        # Create the application buttonbox
+        container = ttk.Frame(self)
+        container.pack(fill=X, expand=YES, pady=(15, 10))
+
+        sub_btn = ttk.Button(
+            master=container,
+            text="Submit",
+            command=self.on_submit,
+            bootstyle=SUCCESS,
+            width=6,
+        )
+        sub_btn.pack(side=RIGHT, padx=5)
+        sub_btn.focus_set()
+
+        cnl_btn = ttk.Button(
+            master=container,
+            text="Cancel",
+            command=self.on_cancel,
+            bootstyle=DANGER,
+            width=6,
+        )
+        cnl_btn.pack(side=RIGHT, padx=5)
+
+    def create_cancel_button(self):
+        # Create the application buttonbox
+        container = ttk.Frame(self)
+        container.pack(fill=X, expand=YES, pady=(15, 10))
+
+        cnl_btn = ttk.Button(
+            master=container,
+            text="Cancel",
+            command=self.on_cancel,
+            bootstyle=DANGER,
+            width=6,
+        )
+        cnl_btn.pack(side=RIGHT, padx=5)
+
+    def on_submit(self):
+        # check if sample is available to view
+        samples = self.samples.get()
+        samples = samples.split(', ')
+        pick = self.choice.get()
+        if pick in samples:
+            # pull up desired values
+            df = pd.read_csv('tests.csv')
+            disChoice = df.iloc[int(pick)-1]
+            print(disChoice)
+
+            # display values
+            sampleNum = "ID:                 " + str(disChoice['index'])
+            sn = ttk.Label(master=self, text=sampleNum, width=50)
+            sn.pack(fill=X, pady=10)
+
+            date = "Date:             " + str(disChoice['date'])
+            dateL = ttk.Label(master=self, text=date, width=50)
+            dateL.pack(fill=X, pady=10)
+            
+            job = "Job:               " + str(disChoice['job'])
+            jobL = ttk.Label(master=self, text=job, width=50)
+            jobL.pack(fill=X, pady=10)
+
+            location = "location:       " + str(disChoice['location'])
+            locationL = ttk.Label(master=self, text=location, width=50)
+            locationL.pack(fill=X, pady=10)
+
+            slump = "Slump:           " + str(disChoice['slump'])
+            slumpL = ttk.Label(master=self, text=slump, width=50)
+            slumpL.pack(fill=X, pady=10)
+
+            air = "Air:                 " + str(disChoice['air'])
+            airL = ttk.Label(master=self, text=air, width=50)
+            airL.pack(fill=X, pady=10)
+
+            temp = "Tempature:   " + str(disChoice['temp'])
+            tempL = ttk.Label(master=self, text=temp, width=50)
+            tempL.pack(fill=X, pady=10)
+
+            uw = "Unit Weight: " + str(disChoice['unit weight'])
+            uwL = ttk.Label(master=self, text=uw, width=50)
+            uwL.pack(fill=X, pady=10)
+
+            strength = "Strength:       " + str(disChoice['strength'])
+            strengthL = ttk.Label(master=self, text=strength, width=50)
+            strengthL.pack(fill=X, pady=10)
+
+            self.create_cancel_button()
+        else:
+            errorMessage = "That is not a valid sample ID"
+            eM = ttk.Label(master=self, text=errorMessage, width=50)
+            eM.pack(fill=X, pady=10)        
+
+        return True
+  
     def on_cancel(self):
         # Cancel and close the application.
         self.forget()
