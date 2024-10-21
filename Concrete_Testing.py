@@ -78,23 +78,11 @@ class NewSample(ttk.Frame):
         container = ttk.Frame(self)
         container.pack(fill=X, expand=YES, pady=(15, 10))
 
-        sub_btn = ttk.Button(
-            master=container,
-            text="Submit",
-            command=self.on_submit,
-            bootstyle=SUCCESS,
-            width=6,
-        )
+        sub_btn = ttk.Button(master=container, text="Submit", command=self.on_submit, bootstyle=SUCCESS, width=6)
         sub_btn.pack(side=RIGHT, padx=5)
         sub_btn.focus_set()
 
-        cnl_btn = ttk.Button(
-            master=container,
-            text="Cancel",
-            command=self.on_cancel,
-            bootstyle=DANGER,
-            width=6,
-        )
+        cnl_btn = ttk.Button(master=container, text="Cancel", command=self.on_cancel, bootstyle=DANGER, width=6)
         cnl_btn.pack(side=RIGHT, padx=5)
 
     def on_submit(self):
@@ -219,8 +207,6 @@ class StrengthTest(ttk.Frame):
         self.diameter = ttk.StringVar(value="")
         self.load = ttk.StringVar(value="")
 
-        
-
         # Tests that can be ran
         testsToRun = ''
         with open('tests.csv', 'r') as file:
@@ -274,23 +260,11 @@ class StrengthTest(ttk.Frame):
         container = ttk.Frame(self)
         container.pack(fill=X, expand=YES, pady=(15, 10))
 
-        sub_btn = ttk.Button(
-            master=container,
-            text="Submit",
-            command=self.on_submit,
-            bootstyle=SUCCESS,
-            width=6,
-        )
+        sub_btn = ttk.Button( master=container, text="Submit", command=self.on_submit, bootstyle=SUCCESS, width=6)
         sub_btn.pack(side=RIGHT, padx=5)
         sub_btn.focus_set()
 
-        cnl_btn = ttk.Button(
-            master=container,
-            text="Cancel",
-            command=self.on_cancel,
-            bootstyle=DANGER,
-            width=6,
-        )
+        cnl_btn = ttk.Button(master=container, text="Cancel", command=self.on_cancel, bootstyle=DANGER, width=6)
         cnl_btn.pack(side=RIGHT, padx=5)
 
     def create_cancel_button(self):
@@ -298,13 +272,7 @@ class StrengthTest(ttk.Frame):
         container = ttk.Frame(self)
         container.pack(fill=X, expand=YES, pady=(15, 10))
 
-        cnl_btn = ttk.Button(
-            master=container,
-            text="Cancel",
-            command=self.on_cancel,
-            bootstyle=DANGER,
-            width=6,
-        )
+        cnl_btn = ttk.Button(master=container, text="Cancel", command=self.on_cancel, bootstyle=DANGER, width=6,)
         cnl_btn.pack(side=RIGHT, padx=5)
 
     def on_submit(self):
@@ -355,7 +323,6 @@ class CheckResults(ttk.Frame):
 
         # strenght test variables
         self.choice = ttk.StringVar(value=None)
-        
 
         # Tests that can be ran
         sampleNumbers = ''
@@ -407,23 +374,11 @@ class CheckResults(ttk.Frame):
         container = ttk.Frame(self)
         container.pack(fill=X, expand=YES, pady=(15, 10))
 
-        sub_btn = ttk.Button(
-            master=container,
-            text="Submit",
-            command=self.on_submit,
-            bootstyle=SUCCESS,
-            width=6,
-        )
+        sub_btn = ttk.Button(master=container, text="Submit", command=self.on_submit,bootstyle=SUCCESS,width=6,)
         sub_btn.pack(side=RIGHT, padx=5)
         sub_btn.focus_set()
 
-        cnl_btn = ttk.Button(
-            master=container,
-            text="Cancel",
-            command=self.on_cancel,
-            bootstyle=DANGER,
-            width=6,
-        )
+        cnl_btn = ttk.Button(master=container,text="Cancel",command=self.on_cancel,bootstyle=DANGER,width=6,)
         cnl_btn.pack(side=RIGHT, padx=5)
 
     def create_cancel_button(self):
@@ -431,13 +386,7 @@ class CheckResults(ttk.Frame):
         container = ttk.Frame(self)
         container.pack(fill=X, expand=YES, pady=(15, 10))
 
-        cnl_btn = ttk.Button(
-            master=container,
-            text="Cancel",
-            command=self.on_cancel,
-            bootstyle=DANGER,
-            width=6,
-        )
+        cnl_btn = ttk.Button(master=container, text="Cancel", command=self.on_cancel, bootstyle=DANGER, width=6)
         cnl_btn.pack(side=RIGHT, padx=5)
 
     def on_submit(self):

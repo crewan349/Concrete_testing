@@ -1,5 +1,6 @@
 index,date,job,location,slump,air,temp,unit weight,strength
-1,10-16-2024,City Of Reno,Reno,4.25,6,74,140.2,5800
-2,10-17-2024,Q&D,Reno,4,4.5,70,138.5,*
-3,10-18-2024,City Of Reno,Truckee,2.75,3,72,139.3,5000
+1,10-16-2024,City Of Reno,Reno,4.25,6.0,74,140.2,5800
+2,10-17-2024,Q&D,Reno,4.0,4.5,70,138.5,*
+3,10-18-2024,City Of Reno,Truckee,2.75,3.0,72,139.3,5000
 4,10-19-2024,City of Elko,Elko,4.25,4.3,76,138.2,*
+5,10-21-2024,City of Sparks,Sparks,1.25,5.0,78,138.9,*
