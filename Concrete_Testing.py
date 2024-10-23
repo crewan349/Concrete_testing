@@ -126,7 +126,7 @@ class NewSample(ttk.Frame):
 
         if not checkSlump:
             check +=1
-            errorMessage = ttk.Label(master=self, text="Slump most be rounded to the nearest quarter inch", width=50)
+            errorMessage = ttk.Label(master=self, text="Slump must be rounded to the nearest quarter inch", width=50)
             errorMessage.pack(fill=X, pady=10)
 
         #the air must be put in to the nearist tenth
